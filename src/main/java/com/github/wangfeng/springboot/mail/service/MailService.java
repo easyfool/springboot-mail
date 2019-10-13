@@ -2,6 +2,7 @@ package com.github.wangfeng.springboot.mail.service;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
+import java.util.Map;
 
 public interface MailService {
     /**
@@ -32,4 +33,6 @@ public interface MailService {
      * @param filePath 附件
      */
     void sendAttachmentsMail(String to, String subject, String content, String filePath);
+
+    void sendMailWitTemplate(String to, String subject, Map<String, Object> contentVaraibles, String templatePath) throws MessagingException;
 }

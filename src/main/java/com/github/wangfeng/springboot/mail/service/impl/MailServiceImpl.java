@@ -11,11 +11,14 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -23,6 +26,9 @@ public class MailServiceImpl implements MailService {
 
     @Autowired
     private JavaMailSender mailSender;
+
+    @Autowired
+    private TemplateEngine templateEngine;
 
 
     /**
@@ -114,5 +120,32 @@ public class MailServiceImpl implements MailService {
         }
 
 
+    }
+
+    @Override
+    public void sendMailWitTemplate(String to, String subject, Map<String, Object> contentVaraibles, String templatePath) throws MessagingException {
+        String content = build(contentVaraibles, templatePath);
+        //创建一个发送复杂消息对象
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
+
+        helper.setSubject(subject);
+        //邮件内容,setText()第二个参数表示是否开启解析html
+        helper.setText(content, true);
+
+        helper.setFrom(from);
+        helper.setTo(to);
+
+        mailSender.send(mimeMessage);
+    }
+
+    public String build(Map<String, Object> contentVariables, String templatePath) {
+        Context context = new Context();
+//        context.setVariable("message", "hello");
+        //向模板中传递参数
+        context.setVariables(contentVariables);
+        String result = templateEngine.process(templatePath, context);
+        log.info(result);
+        return result;
     }
 }
